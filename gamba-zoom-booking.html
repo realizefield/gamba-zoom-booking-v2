@@ -30,7 +30,7 @@
   .empty-note{font-size:13px;color:var(--muted);text-align:center;padding:20px 0;}
   .submit-btn{width:100%;background:linear-gradient(135deg,var(--orange),#ffca28);color:#fff;border:none;padding:15px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
   .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
-  .msg{font-size:13px;border-radius:10px;padding:12px 16px;margin-top:12px;display:none;}
+  .msg{font-size:13px;border-radius:10px;padding:12px 16px;margin-top:12px;display:none;white-space:pre-line;}
   .msg.error{background:#ffebee;color:#c62828;display:block;}
   .msg.success{background:#e8f5e9;color:#2e7d32;display:block;}
   .selected-box{background:var(--blue-light);border-radius:10px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--dark);margin-bottom:14px;display:none;}
@@ -48,7 +48,7 @@
 <div class="wrap">
   <div class="header">
     <h1>📅 Zoom指導のご予約</h1>
-    <p>ご希望の日時をお選びください。1回のご予約で1コマとなります。<br>同じ時間帯に複数の生徒さんが入ることがありますが、Zoomの個室に分かれての指導となりますので、他の生徒さんに指導内容が聞こえることはありません。</p>
+    <p>ご希望の日時をお選びください。複数の日時をまとめて選んで、一度に予約することもできます。<br>同じ時間帯に複数の生徒さんが入ることがありますが、Zoomの個室に分かれての指導となりますので、他の生徒さんに指導内容が聞こえることはありません。</p>
   </div>
 
   <div class="card">
@@ -77,13 +77,14 @@
 
   <div class="card">
     <h2>② 日時を選ぶ</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">複数の日時をまとめて選んで、一度に予約することもできます（週2回プランで1週間分をまとめて予約する場合など）。</p>
     <div id="slotsArea"><p class="empty-note">読み込み中...</p></div>
   </div>
 
   <div class="card">
     <h2>③ 予約を確定する</h2>
     <div class="selected-box" id="selectedBox"></div>
-    <button class="submit-btn" id="bookBtn" disabled>この日時で予約する</button>
+    <button class="submit-btn" id="bookBtn" disabled>日時を選択してください</button>
     <div class="msg" id="bookMsg"></div>
   </div>
 
@@ -102,7 +103,7 @@
 // ▼ ここをGASデプロイ後のURLに書き換えてください
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwYbelv29Vo2neVDKzxToYmRXWLCCIzGVdT3DUqV3bWraGtJ9xZQSSo9dM2UEymEnpx3g/exec';
 
-let selectedSlot = null;
+const selectedSlots = new Map(); // key: slot.key, value: slot object（複数選択に対応）
 let slotsCache = [];
 
 // 前回入力した生徒ID・お名前・メール等をこの端末のブラウザに覚えておき、次回から自動で入力欄に入れておく
@@ -156,7 +157,8 @@ async function loadSlots() {
       btn.className = 'slot-btn';
       btn.textContent = slot.label;
       btn.dataset.key = slot.key;
-      btn.onclick = function () { selectSlot(slot, btn); };
+      if (selectedSlots.has(slot.key)) btn.classList.add('selected');
+      btn.onclick = function () { toggleSlot(slot, btn); };
       area.appendChild(btn);
     });
   } catch (err) {
@@ -164,14 +166,33 @@ async function loadSlots() {
   }
 }
 
-function selectSlot(slot, btn) {
-  document.querySelectorAll('.slot-btn').forEach(function (b) { b.classList.remove('selected'); });
-  btn.classList.add('selected');
-  selectedSlot = slot;
+function toggleSlot(slot, btn) {
+  if (selectedSlots.has(slot.key)) {
+    selectedSlots.delete(slot.key);
+    btn.classList.remove('selected');
+  } else {
+    selectedSlots.set(slot.key, slot);
+    btn.classList.add('selected');
+  }
+  updateSelectedBox();
+}
+
+function updateSelectedBox() {
   const box = document.getElementById('selectedBox');
+  const btn = document.getElementById('bookBtn');
+  const count = selectedSlots.size;
+  if (count === 0) {
+    box.style.display = 'none';
+    box.textContent = '';
+    btn.disabled = true;
+    btn.textContent = '日時を選択してください';
+    return;
+  }
+  const labels = Array.from(selectedSlots.values()).map(function (s) { return s.label; });
   box.style.display = 'block';
-  box.textContent = '選択中：' + slot.label;
-  document.getElementById('bookBtn').disabled = false;
+  box.textContent = '選択中（' + count + '件）：' + labels.join('　/　');
+  btn.disabled = false;
+  btn.textContent = count === 1 ? 'この日時で予約する' : 'この' + count + '件をまとめて予約する';
 }
 
 document.getElementById('bookBtn').addEventListener('click', async function () {
@@ -182,38 +203,60 @@ document.getElementById('bookBtn').addEventListener('click', async function () {
   const emergencyContact = document.getElementById('emergencyContact').value.trim();
   const msg = document.getElementById('bookMsg');
   msg.className = 'msg';
-  msg.style.display = 'none';
+  msg.removeAttribute('style');
 
-  if (!selectedSlot) { showMsg('日時を選択してください。', true); return; }
+  const slotsToBook = Array.from(selectedSlots.values());
+  if (!slotsToBook.length) { showMsg('日時を選択してください。', true); return; }
   if (!name) { showMsg('お名前を入力してください。', true); return; }
   if (!email) { showMsg('メールアドレスを入力してください。', true); return; }
 
   const btn = document.getElementById('bookBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>予約中...';
 
-  try {
-    const data = await callApi({
-      action: 'book',
-      datetimeKey: selectedSlot.key,
-      studentId: studentId, name: name, email: email, lineId: lineId, emergencyContact: emergencyContact,
-    });
-    if (data.success) {
-      showMsg('✅ ' + data.label + ' でご予約を承りました。確認メールをお送りしましたのでご確認ください。', false);
-      saveRememberedInfo(studentId, name, email, lineId, emergencyContact);
-      selectedSlot = null;
-      document.getElementById('selectedBox').style.display = 'none';
-      btn.textContent = 'この日時で予約する';
-      loadSlots();
-    } else {
-      showMsg(data.error || '予約に失敗しました。', true);
-      btn.disabled = false;
-      btn.textContent = 'この日時で予約する';
+  const succeeded = [];
+  const failed = [];
+
+  for (let i = 0; i < slotsToBook.length; i++) {
+    const slot = slotsToBook[i];
+    btn.innerHTML = '<span class="spinner"></span>予約中...（' + (i + 1) + '/' + slotsToBook.length + '）';
+    try {
+      const data = await callApi({
+        action: 'book',
+        datetimeKey: slot.key,
+        studentId: studentId, name: name, email: email, lineId: lineId, emergencyContact: emergencyContact,
+      });
+      if (data.success) {
+        succeeded.push(data.label);
+      } else {
+        failed.push(slot.label + '（' + (data.error || '予約に失敗しました') + '）');
+      }
+    } catch (err) {
+      failed.push(slot.label + '（通信エラー：' + err.message + '）');
     }
-  } catch (err) {
-    showMsg('通信エラーが発生しました：' + err.message, true);
-    btn.disabled = false;
-    btn.textContent = 'この日時で予約する';
+  }
+
+  if (succeeded.length) {
+    saveRememberedInfo(studentId, name, email, lineId, emergencyContact);
+  }
+  selectedSlots.clear();
+
+  if (!failed.length) {
+    showMsg('✅ ' + succeeded.length + '件すべてのご予約を承りました（' + succeeded.join('　/　') + '）。確認メールをお送りしましたのでご確認ください。', false);
+  } else if (succeeded.length) {
+    showMsg('一部のみ予約できました。\n成功：' + succeeded.join('　/　') + '\n失敗：' + failed.join('　/　'), true);
+  } else {
+    showMsg('予約できませんでした。\n' + failed.join('　/　'), true);
+  }
+
+  updateSelectedBox();
+  loadSlots();
+
+  if (succeeded.length) {
+    const key = email || studentId;
+    if (key) {
+      document.getElementById('searchKey').value = key;
+      performSearch(key);
+    }
   }
 });
 
@@ -223,8 +266,9 @@ function showMsg(text, isError) {
   msg.className = 'msg ' + (isError ? 'error' : 'success');
 }
 
-document.getElementById('searchBtn').addEventListener('click', async function () {
-  const key = document.getElementById('searchKey').value.trim();
+async function performSearch(keyOverride) {
+  const searchInput = document.getElementById('searchKey');
+  const key = (keyOverride !== undefined ? keyOverride : searchInput.value).trim();
   const area = document.getElementById('myBookingsArea');
   if (!key) { area.innerHTML = '<p class="empty-note">生徒IDまたはメールアドレスを入力してください。</p>'; return; }
   area.innerHTML = '<p class="empty-note">検索中...</p>';
@@ -246,7 +290,7 @@ document.getElementById('searchBtn').addEventListener('click', async function ()
       if (!confirm('この予約をキャンセルしますか？')) return;
       const res = await callApi({ action: 'cancel', bookingId: b.bookingId });
       if (res.success) {
-        document.getElementById('searchBtn').click();
+        performSearch(key);
         loadSlots();
       } else {
         alert(res.error || 'キャンセルに失敗しました。');
@@ -255,7 +299,9 @@ document.getElementById('searchBtn').addEventListener('click', async function ()
     row.appendChild(cancelBtn);
     area.appendChild(row);
   });
-});
+}
+
+document.getElementById('searchBtn').addEventListener('click', function () { performSearch(); });
 
 loadRememberedInfo();
 loadSlots();
