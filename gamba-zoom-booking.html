@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoom指導 予約｜江原予備校GAMBA</title>
+<style>
+  :root{
+    --blue:#29b6f6; --blue-dark:#0288d1; --blue-light:#e1f5fe;
+    --orange:#ff8f00; --dark:#01579b; --text:#37474f; --muted:#78909c;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;background:linear-gradient(135deg,#e1f5fe,#f0faff);color:var(--text);line-height:1.8;padding:24px 16px 60px;}
+  .wrap{max-width:640px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:28px;}
+  .header h1{font-size:22px;color:var(--dark);font-weight:900;}
+  .header p{font-size:13px;color:var(--muted);margin-top:6px;}
+  .card{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:0 4px 20px rgba(2,136,209,0.10);margin-bottom:20px;border:1px solid #e1f5fe;}
+  .card h2{font-size:16px;color:var(--dark);font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .form-group{margin-bottom:14px;}
+  label{display:block;font-size:12px;font-weight:700;color:var(--dark);margin-bottom:6px;}
+  input[type=text],input[type=email]{width:100%;padding:11px 14px;border:1.5px solid #b3e5fc;border-radius:10px;font-size:14px;font-family:inherit;outline:none;}
+  input:focus{border-color:var(--blue-dark);}
+  .slot-week{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 8px;letter-spacing:.05em;}
+  .slot-week:first-child{margin-top:0;}
+  .slot-btn{display:block;width:100%;text-align:left;background:var(--blue-light);border:1.5px solid #b3e5fc;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--dark);cursor:pointer;margin-bottom:8px;transition:.15s;}
+  .slot-btn:hover{background:#b3e5fc;}
+  .slot-btn.selected{background:var(--blue-dark);color:#fff;border-color:var(--blue-dark);}
+  .empty-note{font-size:13px;color:var(--muted);text-align:center;padding:20px 0;}
+  .submit-btn{width:100%;background:linear-gradient(135deg,var(--orange),#ffca28);color:#fff;border:none;padding:15px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .msg{font-size:13px;border-radius:10px;padding:12px 16px;margin-top:12px;display:none;}
+  .msg.error{background:#ffebee;color:#c62828;display:block;}
+  .msg.success{background:#e8f5e9;color:#2e7d32;display:block;}
+  .selected-box{background:var(--blue-light);border-radius:10px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--dark);margin-bottom:14px;display:none;}
+  .booking-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--blue-light);border-radius:10px;margin-bottom:8px;font-size:13px;}
+  .cancel-btn{background:none;border:1.5px solid #ef9a9a;color:#c62828;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;}
+  .search-row{display:flex;gap:8px;}
+  .search-row input{flex:1;}
+  .search-row button{background:var(--blue-dark);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:13px;font-weight:700;cursor:pointer;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>📅 Zoom指導のご予約</h1>
+    <p>ご希望の日時をお選びください。1回のご予約で1コマとなります。<br>同じ時間帯に複数の生徒さんが入ることがありますが、Zoomの個室に分かれての指導となりますので、他の生徒さんに指導内容が聞こえることはありません。</p>
+  </div>
+
+  <div class="card">
+    <h2>① お客様情報</h2>
+    <div class="form-group">
+      <label>生徒ID</label>
+      <input type="text" id="studentId" placeholder="例：KAK-2026-001 または NAI-2026-001">
+    </div>
+    <div class="form-group">
+      <label>お名前<span style="color:#e53935"> *</span></label>
+      <input type="text" id="name" placeholder="例：江原太郎">
+    </div>
+    <div class="form-group">
+      <label>メールアドレス<span style="color:#e53935"> *</span></label>
+      <input type="email" id="email" placeholder="例：example@mail.com">
+    </div>
+    <div class="form-group">
+      <label>LINE ID（任意）</label>
+      <input type="text" id="lineId" placeholder="緊急連絡用">
+    </div>
+    <div class="form-group">
+      <label>緊急連絡先（電話番号など・任意）</label>
+      <input type="text" id="emergencyContact" placeholder="例：090-1234-5678（LINEをお使いでない方はこちらへご入力ください）">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>② 日時を選ぶ</h2>
+    <div id="slotsArea"><p class="empty-note">読み込み中...</p></div>
+  </div>
+
+  <div class="card">
+    <h2>③ 予約を確定する</h2>
+    <div class="selected-box" id="selectedBox"></div>
+    <button class="submit-btn" id="bookBtn" disabled>この日時で予約する</button>
+    <div class="msg" id="bookMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 予約済みの確認・キャンセル</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">キャンセルされる場合は、可能な限り前日までにお願いいたします。</p>
+    <div class="search-row">
+      <input type="text" id="searchKey" placeholder="生徒IDまたはメールアドレスを入力">
+      <button id="searchBtn">確認する</button>
+    </div>
+    <div id="myBookingsArea" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<script>
+// ▼ ここをGASデプロイ後のURLに書き換えてください
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwYbelv29Vo2neVDKzxToYmRXWLCCIzGVdT3DUqV3bWraGtJ9xZQSSo9dM2UEymEnpx3g/exec';
+
+let selectedSlot = null;
+let slotsCache = [];
+
+// 前回入力した生徒ID・お名前・メール等をこの端末のブラウザに覚えておき、次回から自動で入力欄に入れておく
+// （毎回入れ直す手間を減らすためのもの。他の生徒や他の端末には共有されない）
+const REMEMBER_KEY = 'gamba_zoom_booking_info';
+
+function loadRememberedInfo() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY) || '{}');
+    if (saved.studentId) document.getElementById('studentId').value = saved.studentId;
+    if (saved.name) document.getElementById('name').value = saved.name;
+    if (saved.email) document.getElementById('email').value = saved.email;
+    if (saved.lineId) document.getElementById('lineId').value = saved.lineId;
+    if (saved.emergencyContact) document.getElementById('emergencyContact').value = saved.emergencyContact;
+    if (saved.email || saved.studentId) {
+      document.getElementById('searchKey').value = saved.email || saved.studentId;
+    }
+  } catch (err) {
+    // ブラウザの設定等で保存内容が読めない場合は、何も自動入力せず通常どおり進める
+  }
+}
+
+function saveRememberedInfo(studentId, name, email, lineId, emergencyContact) {
+  try {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ studentId, name, email, lineId, emergencyContact }));
+  } catch (err) {
+    // 保存できない場合も予約自体には影響しない
+  }
+}
+
+async function callApi(payload) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
+async function loadSlots() {
+  const area = document.getElementById('slotsArea');
+  try {
+    const data = await callApi({ action: 'getSlots' });
+    if (!data.success) { area.innerHTML = '<p class="empty-note">読み込みに失敗しました。</p>'; return; }
+    slotsCache = data.slots;
+    if (!slotsCache.length) { area.innerHTML = '<p class="empty-note">現在、空いている日時がありません。少し期間をおいて再度ご確認ください。</p>'; return; }
+    area.innerHTML = '';
+    slotsCache.forEach(function (slot) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-btn';
+      btn.textContent = slot.label;
+      btn.dataset.key = slot.key;
+      btn.onclick = function () { selectSlot(slot, btn); };
+      area.appendChild(btn);
+    });
+  } catch (err) {
+    area.innerHTML = '<p class="empty-note">読み込みでエラーが発生しました（' + err.message + '）。ページを再読み込みしてください。</p>';
+  }
+}
+
+function selectSlot(slot, btn) {
+  document.querySelectorAll('.slot-btn').forEach(function (b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  selectedSlot = slot;
+  const box = document.getElementById('selectedBox');
+  box.style.display = 'block';
+  box.textContent = '選択中：' + slot.label;
+  document.getElementById('bookBtn').disabled = false;
+}
+
+document.getElementById('bookBtn').addEventListener('click', async function () {
+  const studentId = document.getElementById('studentId').value.trim();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const lineId = document.getElementById('lineId').value.trim();
+  const emergencyContact = document.getElementById('emergencyContact').value.trim();
+  const msg = document.getElementById('bookMsg');
+  msg.className = 'msg';
+  msg.style.display = 'none';
+
+  if (!selectedSlot) { showMsg('日時を選択してください。', true); return; }
+  if (!name) { showMsg('お名前を入力してください。', true); return; }
+  if (!email) { showMsg('メールアドレスを入力してください。', true); return; }
+
+  const btn = document.getElementById('bookBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>予約中...';
+
+  try {
+    const data = await callApi({
+      action: 'book',
+      datetimeKey: selectedSlot.key,
+      studentId: studentId, name: name, email: email, lineId: lineId, emergencyContact: emergencyContact,
+    });
+    if (data.success) {
+      showMsg('✅ ' + data.label + ' でご予約を承りました。確認メールをお送りしましたのでご確認ください。', false);
+      saveRememberedInfo(studentId, name, email, lineId, emergencyContact);
+      selectedSlot = null;
+      document.getElementById('selectedBox').style.display = 'none';
+      btn.textContent = 'この日時で予約する';
+      loadSlots();
+    } else {
+      showMsg(data.error || '予約に失敗しました。', true);
+      btn.disabled = false;
+      btn.textContent = 'この日時で予約する';
+    }
+  } catch (err) {
+    showMsg('通信エラーが発生しました：' + err.message, true);
+    btn.disabled = false;
+    btn.textContent = 'この日時で予約する';
+  }
+});
+
+function showMsg(text, isError) {
+  const msg = document.getElementById('bookMsg');
+  msg.textContent = text;
+  msg.className = 'msg ' + (isError ? 'error' : 'success');
+}
+
+document.getElementById('searchBtn').addEventListener('click', async function () {
+  const key = document.getElementById('searchKey').value.trim();
+  const area = document.getElementById('myBookingsArea');
+  if (!key) { area.innerHTML = '<p class="empty-note">生徒IDまたはメールアドレスを入力してください。</p>'; return; }
+  area.innerHTML = '<p class="empty-note">検索中...</p>';
+  const isEmail = key.includes('@');
+  const data = await callApi({ action: 'myBookings', studentId: isEmail ? '' : key, email: isEmail ? key : '' });
+  if (!data.success || !data.bookings.length) {
+    area.innerHTML = '<p class="empty-note">現在有効なご予約は見つかりませんでした。</p>';
+    return;
+  }
+  area.innerHTML = '';
+  data.bookings.forEach(function (b) {
+    const row = document.createElement('div');
+    row.className = 'booking-item';
+    row.innerHTML = '<span>' + b.label + '</span>';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'cancel-btn';
+    cancelBtn.textContent = 'キャンセル';
+    cancelBtn.onclick = async function () {
+      if (!confirm('この予約をキャンセルしますか？')) return;
+      const res = await callApi({ action: 'cancel', bookingId: b.bookingId });
+      if (res.success) {
+        document.getElementById('searchBtn').click();
+        loadSlots();
+      } else {
+        alert(res.error || 'キャンセルに失敗しました。');
+      }
+    };
+    row.appendChild(cancelBtn);
+    area.appendChild(row);
+  });
+});
+
+loadRememberedInfo();
+loadSlots();
+</script>
+</body>
+</html>
