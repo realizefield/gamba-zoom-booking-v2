@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>アンケートのお願い｜江原予備校GAMBA</title>
+<style>
+  :root {
+    --blue-deep: #1F3864;
+    --blue: #2B5797;
+    --blue-soft: #E8EEF7;
+    --orange: #E8802B;
+    --orange-soft: #FDF1E5;
+    --ink: #2C3038;
+    --ink-soft: #5C6470;
+    --line: #DCE1E8;
+    --bg: #F7F9FC;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  header {
+    padding: 32px 0 20px;
+    text-align: center;
+  }
+  .school {
+    font-size: 13px;
+    color: var(--blue);
+    letter-spacing: .08em;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: 21px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--blue-deep);
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 20px;
+    margin-bottom: 18px;
+  }
+
+  .lead {
+    background: var(--blue-soft);
+    border: none;
+    font-size: 15px;
+  }
+  .lead p { margin: 0 0 12px; }
+  .lead p:last-child { margin-bottom: 0; }
+  .lead strong { color: var(--blue-deep); }
+
+  .qnum {
+    display: inline-block;
+    background: var(--blue);
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 4px;
+    line-height: 1.6;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+
+  label.opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 15px;
+    line-height: 1.6;
+    transition: border-color .15s, background .15s;
+  }
+  label.opt:hover { border-color: var(--blue); }
+  label.opt input { margin-top: 5px; flex-shrink: 0; width: 17px; height: 17px; accent-color: var(--blue); }
+  label.opt.checked { background: var(--blue-soft); border-color: var(--blue); }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label.t {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
+
+  .submit-area { text-align: center; padding: 6px 0 0; }
+  button.send {
+    width: 100%;
+    max-width: 360px;
+    padding: 16px 20px;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  button.send:hover:not(:disabled) { background: #d1721f; }
+  button.send:disabled { background: #C3C8D0; cursor: default; }
+
+  .spinner {
+    display: inline-block;
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin-right: 8px;
+    vertical-align: -2px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .msg {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  .msg.error { display: block; background: #FDECEC; border: 1px solid #F0B4B4; color: #A33; }
+
+  /* 送信完了画面 */
+  #done { display: none; }
+  #done .thanks {
+    text-align: center;
+    padding: 36px 22px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  #done .mark { font-size: 40px; margin-bottom: 12px; }
+  #done h2 {
+    font-size: 19px;
+    color: var(--blue-deep);
+    margin: 0 0 16px;
+    line-height: 1.6;
+  }
+  #done p {
+    font-size: 15px;
+    margin: 0 0 12px;
+    text-align: left;
+  }
+  #done p:last-child { margin-bottom: 0; }
+
+  footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding-top: 26px;
+    line-height: 1.9;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="school">江原予備校GAMBA</p>
+    <h1>アンケートのお願い</h1>
+  </header>
+
+  <div id="form-area">
+
+    <div class="card lead">
+      <p>このたびは、高認GAMBAをご利用いただき、ありがとうございました。</p>
+      <p>今後よりよい形にしていくために、差し支えのない範囲でお聞かせいただけますと幸いです。<strong>すべて任意です。</strong>答えたくない項目は空欄のままで構いませんし、途中でやめていただいても大丈夫です。1分ほどで終わります。</p>
+      <p>ご記入いただいた内容によって、今後のご連絡が増えることはありません。</p>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label class="t" for="studentId">生徒ID（任意）</label>
+        <input type="text" id="studentId" placeholder="例：KAK-2026-000" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="t" for="name">お名前（任意）</label>
+        <input type="text" id="name" placeholder="空欄のままでも送信できます" autocomplete="off">
+      </div>
+      <p class="note" style="margin:10px 0 0;">どちらも空欄で構いません。匿名のままお送りいただけます。</p>
+    </div>
+
+    <div class="card">
+      <span class="qnum">Q1</span>
+      <p class="q">差し支えなければ、いちばん大きかった理由を教えてください。</p>
+      <p class="note">ひとつだけお選びください（任意）</p>
+      <div id="reasonList"></div>
+    </div>
+
+    <div class="card">
+      <span class="qnum">Q2</span>
+      <p class="q">使ってみて、気になったことはありましたか。</p>
+      <p class="note">当てはまるものすべて。特になければ、選ばなくて大丈夫です（任意）</p>
+      <div id="concernList"></div>
+    </div>
+
+    <div class="card">
+      <span class="qnum">Q3</span>
+      <p class="q">その他、お伝えいただけることがあれば。</p>
+      <p class="note">ひとことでも、空欄でも構いません（任意）</p>
+      <textarea id="comment" placeholder="ご自由にお書きください"></textarea>
+    </div>
+
+    <div class="submit-area">
+      <button class="send" id="sendBtn" type="button">送信する</button>
+      <div class="msg" id="msg"></div>
+    </div>
+
+  </div>
+
+  <div id="done">
+    <div class="thanks">
+      <div class="mark">🌱</div>
+      <h2>お答えいただき、ありがとうございました。</h2>
+      <p>いただいたご意見は、これから学ぶ方のために大切に使わせていただきます。</p>
+      <p>またいつでも、戻ってきていただいて構いません。勉強のことでも、そうでないことでも、相談したくなったときはお気軽にご連絡ください。お待ちしております。</p>
+      <p style="text-align:right; margin-top:20px;">江原予備校GAMBA</p>
+    </div>
+  </div>
+
+  <footer>
+    江原予備校GAMBA<br>
+    ご不明な点は、いつものメールまたはLINEへお気軽にどうぞ。
+  </footer>
+
+</div>
+
+<script>
+// ▼ ここをGASデプロイ後のURLに書き換えてください
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyNPP5j9EhYZSM10ADhrEwA2KrhLsb0pOJh40X6xTvDkh3d-McrzMoKe2IA9QB_ATnJEA/exec';
+
+const REASONS = [
+  '費用の面で続けるのが難しくなった',
+  '時間が取れなくなった・忙しくなった',
+  'ご家庭の事情',
+  '体調や気持ちの面で、今は難しくなった',
+  '学習の内容や進め方が合わなかった',
+  '目標が変わった・別の方法で学ぶことにした',
+  'その他',
+  '答えたくない',
+];
+
+const CONCERNS = [
+  '使い方がよくわからなかった・ログインで困った',
+  '質問や相談がしにくかった',
+  '教材がむずかしかった',
+  '教材がやさしすぎた・物足りなかった',
+  '指導の日程が合わせにくかった',
+  '特にない',
+];
+
+function buildOptions(containerId, items, type, groupName) {
+  const box = document.getElementById(containerId);
+  items.forEach(function (text, i) {
+    const id = groupName + '_' + i;
+    const label = document.createElement('label');
+    label.className = 'opt';
+    label.setAttribute('for', id);
+
+    const input = document.createElement('input');
+    input.type = type;
+    input.id = id;
+    input.value = text;
+    if (type === 'radio') input.name = groupName;
+
+    const span = document.createElement('span');
+    span.textContent = text;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    box.appendChild(label);
+
+    input.addEventListener('change', function () {
+      if (type === 'radio') {
+        Array.prototype.forEach.call(box.querySelectorAll('label.opt'), function (l) {
+          l.classList.remove('checked');
+        });
+      }
+      label.classList.toggle('checked', input.checked);
+      clearError();
+    });
+  });
+}
+
+function showError(text) {
+  const msg = document.getElementById('msg');
+  msg.textContent = text;
+  msg.className = 'msg error';
+}
+
+function clearError() {
+  const msg = document.getElementById('msg');
+  msg.textContent = '';
+  msg.className = 'msg';
+}
+
+buildOptions('reasonList', REASONS, 'radio', 'reason');
+buildOptions('concernList', CONCERNS, 'checkbox', 'concern');
+
+document.getElementById('comment').addEventListener('input', clearError);
+
+function collect() {
+  const reasonEl = document.querySelector('input[name="reason"]:checked');
+  const concerns = Array.prototype.slice
+    .call(document.querySelectorAll('#concernList input:checked'))
+    .map(function (el) { return el.value; });
+  return {
+    action: 'submitSurvey',
+    studentId: document.getElementById('studentId').value.trim(),
+    name: document.getElementById('name').value.trim(),
+    reason: reasonEl ? reasonEl.value : '',
+    concerns: concerns,
+    comment: document.getElementById('comment').value.trim(),
+  };
+}
+
+document.getElementById('sendBtn').addEventListener('click', async function () {
+  clearError();
+  const btn = document.getElementById('sendBtn');
+  const payload = collect();
+
+  if (!payload.reason && !payload.concerns.length && !payload.comment) {
+    showError('恐れ入りますが、いずれか1つだけでもお選びいただくか、ひとことご記入ください。');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('done').style.display = 'block';
+      window.scrollTo(0, 0);
+    } else {
+      showError('送信できませんでした。' + (data.error ? '\n（' + data.error + '）' : '') + '\nお手数ですが、時間をおいて再度お試しください。');
+      btn.disabled = false;
+      btn.textContent = '送信する';
+    }
+  } catch (err) {
+    showError('通信エラーが発生しました。\n電波の良い場所で、もう一度お試しください。\n（' + err.message + '）');
+    btn.disabled = false;
+    btn.textContent = '送信する';
+  }
+});
+</script>
+</body>
+</html>
