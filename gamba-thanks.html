@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お申し込みありがとうございました｜江原予備校GAMBA</title>
+<style>
+  :root {
+    --blue-deep: #1F3864;
+    --blue: #2B5797;
+    --blue-soft: #E8EEF7;
+    --orange: #E8802B;
+    --orange-soft: #FDF3E8;
+    --ink: #2C3038;
+    --ink-soft: #5C6470;
+    --line: #DCE1E8;
+    --bg: #F7F9FC;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  header { padding: 40px 0 8px; text-align: center; }
+  .school { font-size: 13px; color: var(--blue); letter-spacing: .08em; margin: 0 0 14px; }
+  .mark { font-size: 44px; line-height: 1; margin-bottom: 14px; }
+  h1 { font-size: 22px; line-height: 1.6; margin: 0 0 10px; color: var(--blue-deep); }
+  .sub { font-size: 15px; color: var(--ink-soft); margin: 0; }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 20px;
+    margin-top: 22px;
+  }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .step-no {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-title { font-size: 17px; font-weight: bold; color: var(--blue-deep); line-height: 1.5; }
+
+  .primary { border: 2px solid var(--orange); background: var(--orange-soft); }
+  .primary .step-no { background: var(--orange); }
+  .primary .step-title { color: #A85614; }
+
+  .cta {
+    display: block;
+    text-align: center;
+    background: var(--orange);
+    color: #fff;
+    text-decoration: none;
+    padding: 17px 20px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    margin-top: 16px;
+  }
+  .cta:hover { background: #d1721f; }
+
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+  .small { font-size: 14px; color: var(--ink-soft); }
+
+  ul { margin: 8px 0 0; padding-left: 1.2em; }
+  li { margin-bottom: 6px; }
+
+  .help {
+    background: var(--blue-soft);
+    border: none;
+    font-size: 15px;
+  }
+  .help h2 { font-size: 16px; color: var(--blue-deep); margin: 0 0 10px; }
+
+  footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding-top: 30px;
+    line-height: 1.9;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="school">江原予備校GAMBA</p>
+    <div class="mark">🌱</div>
+    <h1>お申し込みありがとうございました</h1>
+    <p class="sub">お支払いの手続きが完了しました。</p>
+  </header>
+
+  <div class="card primary">
+    <div class="step-head">
+      <div class="step-no">1</div>
+      <div class="step-title">Zoom面談の日程を選んでください</div>
+    </div>
+    <p>まずは一度お顔を合わせて、これからの進め方をご相談させてください。学習の状況をお聞きして、どこから始めるかを一緒に決めます。</p>
+    <p class="small">ご都合の良い日時をお選びいただくだけです。数日以内のお日にちをおすすめしています。都合が変わったときは、同じページからご自身でキャンセルできます。</p>
+    <a class="cta" href="https://realizefield.github.io/gamba-zoom-booking-v2/gamba-zoom-booking.html">📅 日程を選ぶ</a>
+  </div>
+
+  <div class="card">
+    <div class="step-head">
+      <div class="step-no">2</div>
+      <div class="step-title">ログイン情報のメールをご確認ください</div>
+    </div>
+    <p>ご登録のメールアドレスに、学習システムにログインするための<strong>生徒ID</strong>と<strong>パスワード</strong>をお送りします。</p>
+    <ul>
+      <li>届くまで数分かかることがあります</li>
+      <li>見当たらないときは、<strong>迷惑メールフォルダ</strong>もご確認ください</li>
+      <li>30分たっても届かない場合は、下記までお知らせください</li>
+    </ul>
+    <p class="small" style="margin-top:12px;">メールが届く前でも、日程の予約は先に進めていただけます。</p>
+  </div>
+
+  <div class="card help">
+    <h2>うまく進まないときは</h2>
+    <p>操作でつまずいても、ご自身で解決していただく必要はありません。メールまたはLINEでご連絡いただければ、面談のときに画面を見ながら一緒に確認します。</p>
+    <p class="small" style="margin-top:10px;">「何がわからないのか、うまく説明できない」という状態でも大丈夫です。そのままお送りください。</p>
+  </div>
+
+  <footer>
+    江原予備校GAMBA<br>
+    このページは閉じていただいて構いません。
+  </footer>
+
+</div>
+</body>
+</html>
